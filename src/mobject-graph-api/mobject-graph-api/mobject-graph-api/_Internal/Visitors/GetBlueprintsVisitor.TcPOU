@@ -1,0 +1,286 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="GetBlueprintsVisitor" Id="{8505bb7c-a446-0bdd-1375-23a6e9ad9670}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'} 
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK GetBlueprintsVisitor IMPLEMENTS I_NodeFactoryVisitor, I_NodePrototypeVisitor, I_NodeVisitor, I_ExtensionVisitor, I_InputPortVisitor, I_OutputPortVisitor, I_MetadataVisitor, I_ContentVisitor, I_ParameterVisitor, I_AlarmVisitor
+VAR
+	serializer : I_Serializer;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Initialize" Id="{366d3300-5311-0302-2f8b-97957a3e5594}">
+      <Declaration><![CDATA[METHOD PUBLIC Initialize
+VAR_INPUT
+	Serializer : I_Serializer;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.serializer := Serializer;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitAlarm" Id="{828d5b9f-ca01-0fba-1f6d-bef738c6492d}">
+      <Declaration><![CDATA[METHOD VisitAlarm
+VAR_INPUT
+	VisitingAlarm : I_Alarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.AddString(VisitingAlarm.Message);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitContent" Id="{4f9c9c97-4286-05b5-2e1f-d848a9a30bfd}">
+      <Declaration><![CDATA[METHOD VisitContent
+VAR_INPUT
+	VisitingContent : I_Content;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+
+serializer.AddKeyString('name',VisitingContent.Name);
+serializer.Addkey('datatype');
+VisitingContent.Data.SerializeTypeWith(serializer);
+
+IF VisitingContent.Metadatum.HasMetadata THEN
+	serializer.addkey('metadata');
+	serializer.StartArray();
+	VisitingContent.Metadatum.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitExtension" Id="{53757456-2ae1-0f08-2b04-4e0b3a2be404}">
+      <Declaration><![CDATA[METHOD VisitExtension
+VAR_INPUT
+	VisitingExtension : I_Extension;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Serializer.StartObject();
+Serializer.AddKeyString('name',VisitingExtension.Name);
+
+IF VisitingExtension.Metadatum.HasMetadata THEN
+	serializer.addkey('metadata');
+	serializer.StartArray();
+	VisitingExtension.Metadatum.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingExtension.Alarms.HasAlarms THEN
+	serializer.addkey('alarms');
+	serializer.StartArray();
+	VisitingExtension.Alarms.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingExtension.InputPorts.HasInputPorts THEN
+	serializer.addkey('inputPorts');
+	serializer.StartArray();
+	VisitingExtension.InputPorts.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingExtension.OutputPorts.HasOutputPorts THEN
+	serializer.addkey('outputPorts');
+	serializer.StartArray();
+	VisitingExtension.OutputPorts.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingExtension.Parameters.HasParameters THEN
+	serializer.addkey('parameters');
+	serializer.StartArray();
+	VisitingExtension.Parameters.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingExtension.Contents.HasContents THEN
+	serializer.addkey('contents');
+	serializer.StartArray();
+	VisitingExtension.Parameters.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+Serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitInputPort" Id="{1b580d99-55bc-0c07-19b4-1985dcb779a0}">
+      <Declaration><![CDATA[METHOD VisitInputPort
+VAR_INPUT
+	VisitingInputPort : I_InputPort;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+
+serializer.AddKeyString('name',VisitingInputPort.Name);
+serializer.Addkey('datatype');
+VisitingInputPort.Data.SerializeTypeWith(serializer);
+
+IF VisitingInputPort.Metadatum.HasMetadata THEN
+	serializer.addkey('metadata');
+	serializer.StartArray();
+	VisitingInputPort.Metadatum.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitMetadatum" Id="{ba3e18e2-5c0c-0395-11d5-a072bc4239fa}">
+      <Declaration><![CDATA[METHOD VisitMetadatum
+VAR_INPUT
+	VisitingMetadatum : I_Metadata;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+serializer.AddKeyString('name',VisitingMetadatum.Name);
+serializer.AddkeyObject('value',VisitingMetadatum.Data);
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitNode" Id="{42ea38b6-02b0-05b9-39bd-2a44643f5a6b}">
+      <Declaration><![CDATA[METHOD VisitNode
+VAR_INPUT
+	VisitingNode : I_Node;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+
+IF VisitingNode.Metadatum.HasMetadata THEN
+	serializer.addkey('metadata');
+	serializer.StartArray();
+	VisitingNode.Metadatum.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingNode.Alarms.HasAlarms THEN
+	serializer.addkey('alarms');
+	serializer.StartArray();
+	VisitingNode.Alarms.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingNode.Extensions.HasExtensions THEN
+	serializer.addkey('extensions');
+	serializer.StartArray();
+	VisitingNode.Extensions.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingNode.InputPorts.HasInputPorts THEN
+	serializer.addkey('inputPorts');
+	serializer.StartArray();
+	VisitingNode.InputPorts.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingNode.OutputPorts.HasOutputPorts THEN
+	serializer.addkey('outputPorts');
+	serializer.StartArray();
+	VisitingNode.OutputPorts.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingNode.Parameters.HasParameters THEN
+	serializer.addkey('parameters');
+	serializer.StartArray();
+	VisitingNode.Parameters.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+IF VisitingNode.Contents.HasContents THEN
+	serializer.addkey('contents');
+	serializer.StartArray();
+	VisitingNode.Contents.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitNodeFactory" Id="{35d1f78f-22c6-0dce-19cd-e2fd2dd49615}">
+      <Declaration><![CDATA[METHOD VisitNodeFactory
+VAR_INPUT
+	VisitingNodeFactory : I_NodeFactory;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+serializer.AddKey('blueprints');
+serializer.StartArray();
+VisitingNodeFactory.NodePrototypes.Accept(THIS^);
+serializer.EndArray();
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitNodePrototype" Id="{373f448b-f45c-0188-0cb6-0e896638608d}">
+      <Declaration><![CDATA[METHOD VisitNodePrototype
+VAR_INPUT
+	VisitingPrototype : I_NodePrototype;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+serializer.AddKeyString('path',VisitingPrototype.Path);
+serializer.AddKey('node');
+VisitingPrototype.Node.Accept(THIS^);
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitOutputPort" Id="{01342bd2-7fd0-0e27-1816-078fad8290bf}">
+      <Declaration><![CDATA[METHOD VisitOutputPort
+VAR_INPUT
+	VisitingOutputPort : I_OutputPort;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+
+serializer.AddKeyString('name',VisitingOutputPort.Name);
+serializer.Addkey('datatype');
+VisitingOutputPort.Data.SerializeTypeWith(serializer);
+
+IF VisitingOutputPort.Metadatum.HasMetadata THEN
+	serializer.addkey('metadata');
+	serializer.StartArray();
+	VisitingOutputPort.Metadatum.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="VisitParameter" Id="{916fae83-2ec3-0b52-37e5-5dfe5b5a15fa}">
+      <Declaration><![CDATA[METHOD VisitParameter
+VAR_INPUT
+	VisitingProperty : I_Parameter;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[serializer.StartObject();
+
+serializer.AddKeyString('name',VisitingProperty.Name);
+serializer.Addkey('datatype');
+VisitingProperty.Data.SerializeTypeWith(serializer);
+serializer.Addkey('defaultValue');
+VisitingProperty.Data.SerializeWith(serializer);
+
+IF VisitingProperty.Metadatum.HasMetadata THEN
+	serializer.addkey('metadata');
+	serializer.StartArray();
+	VisitingProperty.Metadatum.Accept(THIS^);
+	serializer.EndArray();
+END_IF
+
+Serializer.EndObject();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

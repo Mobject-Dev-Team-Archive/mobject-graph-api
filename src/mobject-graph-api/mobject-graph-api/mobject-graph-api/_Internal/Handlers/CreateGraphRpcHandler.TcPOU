@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="CreateGraphRpcHandler" Id="{c87a777d-c107-4b6c-8d20-424895fb0191}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'} 
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK CreateGraphRpcHandler IMPLEMENTS I_RpcHandler
+VAR
+	graphFramework : I_GraphFramework;
+	graphs : I_Graphs;
+	lastGraphUuid : T_MAXSTRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Handle" Id="{f3e1eec2-06e1-4750-bbd3-c77bae5a46d3}">
+      <Declaration><![CDATA[METHOD Handle
+VAR_INPUT
+	Parameters : I_Deserializer;
+	Response : I_SynchronousRpcResponse;
+END_VAR
+VAR
+	graph : I_Graph;
+	feedback : DeserializerFeedback;
+	graphDeserializer : I_Deserializer;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF graphs.TryGetGraphByUuid(lastGraphUuid,graph) THEN
+	graphs.RemoveGraph(graph);
+	graph.Dispose();
+	lastGraphUuid := '';
+END_IF
+
+graph := graphFramework.Create();
+graphDeserializer := Parameters.GetKeyObject('graph');
+
+IF NOT graph.TryDeserializeFrom(graphDeserializer, feedback) THEN
+	Response.RejectWithMessage(feedback.FirstError.Message);
+	graph.Dispose();
+	RETURN;
+END_IF
+
+lastGraphUuid := graph.Uuid;
+graphs.AddGraph(graph);
+Response.CompleteWithObject(graph);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Initialize" Id="{e793b06c-0496-4af2-b2a4-7cee08540df3}">
+      <Declaration><![CDATA[METHOD PUBLIC Initialize
+VAR_INPUT
+	GraphFramework : I_GraphFramework;
+	Graphs : I_Graphs;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.graphFramework := GraphFramework;
+THIS^.graphs := Graphs;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
