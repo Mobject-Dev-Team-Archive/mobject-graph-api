@@ -48,7 +48,7 @@
     </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>
-    <LibraryReference Include="mobject-graph-api,0.6.0,mobject">
+    <LibraryReference Include="mobject-graph-api,0.7.0,mobject">
       <Namespace>mobject_graph_api</Namespace>
     </LibraryReference>
   </ItemGroup>
