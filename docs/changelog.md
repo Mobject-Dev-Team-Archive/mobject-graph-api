@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.7.0-alpha
+
+- added support for mobject-server v0.7.0
+- changed api to now support plc cycle "async" processing
+
 ## v0.6.0-alpha
 
 - added support for mobject-graph v0.5.0

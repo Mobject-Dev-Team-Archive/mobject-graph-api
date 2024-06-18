@@ -100,11 +100,11 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[Server.RegisterRpcHandler('CreateGraph',createGraphRpcHandler);
-Server.RegisterRpcHandler('CreateGraphMultiUser',createGraphMultiUserRpcHandler);
-Server.RegisterRpcHandler('GetStatus',getStatusRpcHandler);
-Server.RegisterRpcHandler('GetBlueprints',getBlueprintsRpcHandler);
-Server.RegisterRpcHandler('GetContentValue',getContentValueHandler);]]></ST>
+        <ST><![CDATA[Server.RegisterAsynchronousRpcHandler('CreateGraph',createGraphRpcHandler);
+Server.RegisterAsynchronousRpcHandler('CreateGraphMultiUser',createGraphMultiUserRpcHandler);
+Server.RegisterAsynchronousRpcHandler('GetStatus',getStatusRpcHandler);
+Server.RegisterAsynchronousRpcHandler('GetBlueprints',getBlueprintsRpcHandler);
+Server.RegisterAsynchronousRpcHandler('GetContentValue',getContentValueHandler);]]></ST>
       </Implementation>
     </Method>
   </POU>
